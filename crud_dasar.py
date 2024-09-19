@@ -1,46 +1,43 @@
-#Tugas Capstone 1 CRUD Dasar
-#Eka Surachman
-import pandas as pd
-
+# Tugas 1 Capstone
+# Eka Surachman
 # Sample data
-data = pd.DataFrame({
-    'NIM': ['12A', '12B'],
-    'Nama': ['Reefy', 'Yusuf'],
-    'Gender': ['Pria', 'Pria'],
-    'Kota': ['Cirebon', 'Cirebon'],
-    'Agama': ['Islam', 'Islam']
-})
+data = [
+    {'NIM': '12A', 'Nama': 'Reefy', 'Gender': 'Pria', 'Kota': 'Cirebon', 'Agama': 'Islam'},
+    {'NIM': '12B', 'Nama': 'Yusuf', 'Gender': 'Pria', 'Kota': 'Cirebon', 'Agama': 'Islam'},
+    {'NIM': '12C', 'Nama': 'Nita', 'Gender': 'Wanita', 'Kota': 'Purwakarta', 'Agama': 'Islam'}
+]
 
 
-data.index = pd.RangeIndex(start=1, stop=len(data)+1) # Memulai index dari 1
-data.index.name = 'No.'
+# data.index = pd.RangeIndex(start=1, stop=len(data)+1) # Memulai index dari 1
+# data.index.name = 'No.'
 
 # Warna Header Tabel pada Data Siswa
 GREEN = "\033[32m"
 RESET = "\033[0m"
 
 # Fungsi Membuat Tabel dengan Header Berwarna
-def gt(df, color=GREEN):
-    # Untuk mengetahui lebar kolom
-    col_widths = [max(df[col].astype(str).map(len).max(), len(col)) for col in df.columns]
-    
-    # Membuat garis pemisah antar baris
+def gt(data):
+    if not data:
+        print("Data tidak tersedia.")
+        return
+
+    # Determine column names and widths
+    col_names = data[0].keys()  # Get column names from the first dictionary
+    col_widths = [max(len(str(item[col])) for item in data) for col in col_names]
+
     def row_separator():
         return "+-" + "-+-".join(["-" * width for width in col_widths]) + "-+"
 
-    # Print header separator
     print(row_separator())
     
     # Print header with color
-    colored_header = " | ".join([f"{color}{col:{col_widths[i]}}{RESET}" for i, col in enumerate(df.columns)])
+    colored_header = " | ".join([f"{GREEN}{col:{col_widths[i]}}{RESET}" for i, col in enumerate(col_names)])
     print(f"| {colored_header} |")
     
-    # Print row separator
     print(row_separator())
     
-    # Print rows with border lines
-    for _, row in df.iterrows():
-        row_str = " | ".join([f"{str(row[col]):{col_widths[i]}}" for i, col in enumerate(df.columns)])
+    for item in data:
+        row_str = " | ".join([f"{str(item[col]):{col_widths[i]}}" for i, col in enumerate(col_names)])
         print(f"| {row_str} |")
         print(row_separator())
 
@@ -80,32 +77,21 @@ def judul_tengah(text, lebar):
     print('='*lebar)
 
 def read():
-    a1 = True
-    while a1:
+    while True:
         judul_tengah('Menampilkan Data Siswa', 36)
-        menu1 =[
-        'Menampilkan Seluruh Data',
-        'Menampilkan Data Tertentu',
-        'Kembali ke Menu Utama'
+        menu1 = [
+            'Menampilkan Seluruh Data',
+            'Menampilkan Data Tertentu',
+            'Kembali ke Menu Utama'
         ]
         pilihan(menu1)
 
         i1 = input('Pilih menu [1-3]: ')
 
-        try:
-            i1 = int(i1)
-        except ValueError:
-            print()
-            print('='*50)
-            print("Input tidak valid. Silakan masukkan nomor menu yang benar.")
-            print('='*50)
-            continue
-
-        if i1 == 1:
-            gt(data)
-        elif i1 == 2:
-            a12 = True
-            while a12:
+        if i1 == '1':
+            gt(data)  # Display all student data
+        elif i1 == '2':
+            while True:
                 judul_tengah('Pilih Metode Pencarian Data', 30)
                 menu1_2 = [
                     'NIM',
@@ -115,115 +101,88 @@ def read():
                 pilihan(menu1_2)
                 i12 = input("Pilih menu [1-3]: ")
 
-                try:
-                    i12 = int(i12)
-                except ValueError:
+                if i12 == '1':
+                    input_nim = input('Masukkan NIM Mahasiswa: ').upper()
+                    filtered_data = [student for student in data if student['NIM'] == input_nim]
+                    if filtered_data:
+                        gt(filtered_data)
+                    else:
+                        print()
+                        judul_tengah(f'Data {input_nim} tidak ditemukan', 25)
+                elif i12 == '2':
+                    input_nama = input('Masukkan Nama Mahasiswa: ').capitalize()
+                    filtered_data = [student for student in data if input_nama in student['Nama']]
+                    if filtered_data:
+                        gt(filtered_data)
+                    else:
+                        print()
+                        judul_tengah(f'Data {input_nama} tidak ditemukan', 30)
+                        print()
+                elif i12 == '3':
+                    break  # Exit the inner loop
+                else:
                     print()
-                    print('='*50)
-                    print("Input tidak valid. Silakan masukkan nomor menu yang benar.")
-                    print('='*50)
-                    continue
-
-                if i12 == 1:
-                    input_nim = input('Masukkan NIM Mahasiswa: ').upper() #memasukkan nim siswa
-                    filtered_data = data[data['NIM'] == input_nim]
-                    if not filtered_data.empty:
-                        gt(filtered_data)
-                    else:
-                        print()
-                        judul_tengah(f'Data {input_nim} tidak ditemukan',25)
-                elif i12 == 2:
-                    input_nama = input('Masukkan Nama Mahasiswa: ').capitalize() #memasukkan nim siswa
-                    filtered_data = data[data['Nama'].str.contains(input_nama, case=False, na=False)]
-                    if not filtered_data.empty:
-                        gt(filtered_data)
-                    else:
-                        print()
-                        print('='*50)
-                        print(f'Data {input_nama} tidak ditemukan')
-                        print('='*50)
-                elif i12 == 3:
-                    a12 = False
-        elif i1 == 3:
-            a1 = False
+                    judul_tengah("Pilihan tidak valid. Silakan pilih antara 1-3.", 50)
+                    print()
+        elif i1 == '3':
+            break  # Exit the outer loop
         else:
+            judul_tengah("Pilihan tidak valid. Silakan pilih antara 1-3.", 50)
             print()
-            print('='*50)
-            print("Pilihan tidak valid. Silakan pilih antara 1-3.")
-            print('='*50)
 
 
 
 def create():
     global data
-    a2 = True
-    while a2:
+    while True:
         judul_tengah('Menambah Data Siswa', 32)
-        menu2 = [
-        'Tambah Data Siswa',
-        'Kembali ke Menu Utama'
-        ]
+        menu2 = ['Tambah Data Siswa', 'Kembali ke Menu Utama']
         pilihan(menu2)
         i2 = input('Pilih menu [1-2]: ')
 
-        try:
-            i2 = int(i2)
-        except ValueError:
-            print()
-            print('='*50)
-            print("Input tidak valid. Silakan masukkan nomor menu yang benar.")
-            print('='*50)
-            continue
-
-        if i2 == 1:
+        if i2 == '1':
             judul_tengah('Masukkan Biodata Baru', 30)
             nim = input('Masukkan NIM Mahasiswa: ').upper()
-            if nim in data['NIM'].values:
+            if any(student['NIM'] == nim for student in data):
                 judul_tengah(f'Data NIM {nim} sudah ada', 30)
             else:
                 nama = input('Masukkan Nama Mahasiswa: ').capitalize()
                 gender = input('Masukkan Gender [Pria/Wanita]: ').capitalize()
-                if gender not in ['Pria','Wanita']:
+                if gender not in ['Pria', 'Wanita']:
                     judul_tengah('Input tidak valid', 20)
                 else:
                     kota = input('Masukkan Kota Asal: ').capitalize()
                     agama = input('Masukkan Agama: ').capitalize()
 
-                # Create a new DataFrame with the new data
-                    new_data = pd.DataFrame({
-                        'NIM': [nim],
-                        'Nama': [nama],
-                        'Gender': [gender],
-                        'Kota': [kota],
-                        'Agama': [agama]
-                    })
+                # Create a new dictionary with the new data
+                new_data = {
+                    'NIM': nim,
+                    'Nama': nama,
+                    'Gender': gender,
+                    'Kota': kota,
+                    'Agama': agama
+                }
 
-                # Append the new data to the existing DataFrame
-                    data = pd.concat([data, new_data], ignore_index=True)
-                    print()
-                    judul_tengah(f"Data siswa atas nama {nama} berhasil ditambahkan.", 50)
-
-        elif i2 == 2:
-            a2 = False
-        else:
-            print()
-            print('='*50)
-            print("Pilihan tidak valid. Silakan pilih antara 1-2.")
-            print('='*50)
+                # Append the new data to the existing list
+                data.append(new_data)
+                print()
+                judul_tengah(f"Data siswa atas nama {nama} berhasil ditambahkan.", 40)
+        elif i2 == '2':
+            break
 
 
-def update(): # FUNGSI MENGEDIT DATA
+
+def update():
     global data
-    a31 = True
-    while a31:
+    while True:
         input_nim = input('Masukkan NIM Mahasiswa: ').upper()
-        if input_nim in data['NIM'].values:
-        # Select row to update
-            row_index = data[data['NIM'] == input_nim].index[0]
-            gt(data[data['NIM']==input_nim])
-            print()            
-            judul_tengah("Pilih data yang akan diubah", 28)
+        # Find the student based on NIM
+        student = next((s for s in data if s['NIM'] == input_nim), None)
+
+        if student:
+            gt([student])  # Display the current student data
             print()
+            judul_tengah("Pilih data yang akan diubah", 28)
             menu3_1 = [
                 'Nama',
                 'Gender',
@@ -233,94 +192,65 @@ def update(): # FUNGSI MENGEDIT DATA
             ]
             pilihan(menu3_1)
             i31 = input('Pilih menu [1-5]: ')
-            i31 = int(i31)
 
-            if i31 == 1:
-                print('Masukkan Data Terbaru')
+            if i31 == '1':
                 new_nama = input('Masukkan Nama Mahasiswa: ').capitalize()
                 q = input('Apakah yakin nama akan diubah? [Y/N]: ').upper()
-                try:
-                    if q == 'Y':
-                        data.loc[row_index, 'Nama'] = new_nama
-                        print(f"Data siswa atas nama {new_nama} berhasil diubah.")
-                        a31 = False
-                    elif q == 'N':
-                        a31 = False
-                except ValueError:
-                    print()
-                    print('='*50)
-                    print("Input tidak valid. Silakan masukkan nomor menu yang benar.")
-                    print('='*50)
-                    continue
+                if q == 'Y':
+                    student['Nama'] = new_nama
+                    print(f"Data siswa atas nama {new_nama} berhasil diubah.")
+                    break
+                elif q == 'N':
+                    break
 
-            elif i31 == 2:
-                print('Masukkan Data Terbaru')
-                new_gender = input('Masukkan Gender [L/P]: ').upper()
+            elif i31 == '2':
+                new_gender = input('Masukkan Gender [Pria/Wanita]: ').capitalize()
+                if new_gender not in ['Pria', 'Wanita']:
+                    print("Input tidak valid. Gender harus 'Pria' atau 'Wanita'.")
+                    continue
                 q = input('Apakah yakin gender akan diubah? [Y/N]: ').upper()
-                try:
-                    if q == 'Y':
-                        data.loc[row_index, 'Gender'] = new_gender
-                        print(f"Data gender siswa berhasil diubah menjadi {new_gender}.")
-                        a31 = False
-                    elif q == 'N':
-                        a31 = False
-                except ValueError:
-                    print()
-                    print('='*50)
-                    print("Input tidak valid. Silakan masukkan nomor menu yang benar.")
-                    print('='*50)
-                    continue
-            elif i31 == 3:
-                print('Masukkan Data Terbaru')
+                if q == 'Y':
+                    student['Gender'] = new_gender
+                    print(f"Data gender siswa berhasil diubah menjadi {new_gender}.")
+                    break
+                elif q == 'N':
+                    break
+
+            elif i31 == '3':
                 new_kota = input('Masukkan Kota Asal: ').capitalize()
-                q = input('Apakah yakin nama akan diubah? [Y/N]: ').upper()
-                try:
-                    if q == 'Y':
-                        data.loc[row_index, 'Kota'] = new_kota
-                        print(f"Data kota asal siswa berhasil diubah menjadi {new_kota}.")
-                        a31 = False
-                    elif q == 'N':
-                        a31 = False
-                except ValueError:
-                    print()
-                    print('='*50)
-                    print("Input tidak valid. Silakan masukkan nomor menu yang benar.")
-                    print('='*50)
-                    continue
-            elif i31 == 4:
-                print('Masukkan Data Terbaru')
+                q = input('Apakah yakin kota akan diubah? [Y/N]: ').upper()
+                if q == 'Y':
+                    student['Kota'] = new_kota
+                    print(f"Data kota asal siswa berhasil diubah menjadi {new_kota}.")
+                    break
+                elif q == 'N':
+                    break
+
+            elif i31 == '4':
                 new_agama = input('Masukkan Agama: ').capitalize()
-                q = input('Apakah yakin nama akan diubah? [Y/N]: ').upper()
-                try:
-                    if q == 'Y':
-                        data.loc[row_index, 'Agama'] = new_agama
-                        print(f"Data agama siswa berhasil diubah menjadi {new_agama}.")
-                        a31 = False
-                    elif q == 'N':
-                        a31 = False
-                except ValueError:
-                    print()
-                    print('='*50)
-                    print("Input tidak valid. Silakan masukkan nomor menu yang benar.")
-                    print('='*50)
-                    continue
-            elif i31 == 5:
-                a31 = False
+                q = input('Apakah yakin agama akan diubah? [Y/N]: ').upper()
+                if q == 'Y':
+                    student['Agama'] = new_agama
+                    print(f"Data agama siswa berhasil diubah menjadi {new_agama}.")
+                    break
+                elif q == 'N':
+                    break
+
+            elif i31 == '5':
+                break  # Exit the update function
 
             else:
                 print()
-                print('='*50)
-                print("Pilihan tidak valid.")
-                print('='*50)
+                judul_tengah("Pilihan tidak valid.", 30)
+                print()
         else:
             print()
-            print('='*20)
-            print("Input tidak valid.")
-            print('='*20)
+            judul_tengah("NIM tidak ditemukan.", 30)
+            print()
 
 def delete():
-    a4 = True
-    while a4:
+    global data
+    while True:
         judul_tengah('Menghapus Data Siswa', 32)
         menu4 = [
             'Hapus Data Siswa',
@@ -329,51 +259,29 @@ def delete():
         pilihan(menu4)
         i4 = input('Pilih menu [1-2]: ')
 
-        try:
-            i4 = int(i4)
-        except ValueError:
-            print()
-            print('='*50)
-            print("Input tidak valid. Silakan masukkan nomor menu yang benar.")
-            print('='*50)
-            continue
-        
-        if i4 == 1:
-            a41 = True
-            while a41:
-                input_nim = input('Masukkan NIM Mahasiswa: ').upper()
-                filtered_data = data[data['NIM'] == input_nim]
-                if not filtered_data.empty:
-                    # Select row to update
-                    row_index = data[data['NIM'] == input_nim].index[0]
-                    gt(data[data['NIM']==input_nim])
-                    q = input('Apakah yakin data akan dihapus? [Y/N]: ').upper()
-                    try:
-                        if q == 'Y':
-                            data.drop(row_index, inplace=True)
-                            print(f"Data berhasil dihapus.")
-                            a41 = False
-                        elif q == 'N':
-                            a41 = False
-                    except ValueError:
-                        print()
-                        print('='*50)
-                        print("Input tidak valid. Silakan masukkan input menu yang benar.")
-                        print('='*50)
-                        continue                        
-                else:
-                    print()
-                    print('='*26)
-                    print(f'Data NIM {input_nim} tidak ditemukan')
-                    print('='*26)
+        if i4 == '1':
+            input_nim = input('Masukkan NIM Mahasiswa: ').upper()
+            student_index = next((index for index, s in enumerate(data) if s['NIM'] == input_nim), None)
 
-        elif i4 == 2:
-            a4 = False
+            if student_index is not None:
+                gt([data[student_index]])  
+                q = input('Apakah yakin data akan dihapus? [Y/N]: ').upper()
+                if q == 'Y':
+                    del data[student_index] 
+                    print(f"Data dengan NIM {input_nim} berhasil dihapus.")
+                elif q == 'N':
+                    print("Penghapusan data dibatalkan.")
+                    break
+            else:
+                judul_tengah(f'Data NIM {input_nim} tidak ditemukan.', 26)
+                print()
+
+        elif i4 == '2':
+            break  
+
         else:
+            judul_tengah("Pilihan tidak valid. Silakan pilih antara 1-2.", 45)
             print()
-            print('='*50)
-            print("Pilihan tidak valid. Silakan pilih antara 1-2.")
-            print('='*50)
 
 def crud_dasar():
     a = True
@@ -391,10 +299,8 @@ def crud_dasar():
         try:
             i = int(i)
         except ValueError:
+            print("Input tidak valid. Silakan masukkan nomor menu yang benar.", 50)
             print()
-            print('='*50)
-            print("Input tidak valid. Silakan masukkan nomor menu yang benar.")
-            print('='*50)
             continue
 
         if i == 1:
@@ -408,9 +314,7 @@ def crud_dasar():
         elif i == 5:
             break
         else:
+            judul_tengah("Menu tidak valid. Silakan pilih menu yang tersedia.", 45)
             print()
-            print('='*50)
-            print("Menu tidak valid. Silakan pilih menu yang tersedia.")
-            print('='*50)
 
 crud_dasar()
